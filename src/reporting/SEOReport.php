@@ -17,65 +17,64 @@ use SilverStripe\Forms\TextField;
 use SilverStripe\Reports\Report;
 use SilverStripe\Versioned\Versioned;
 
-
 class SEOReport extends Report
 {
 
-	public function title()
-	{
-		return _t(__CLASS__.'.SEOReport', 'SEO report');
-	}
+    public function title()
+    {
+        return _t(__CLASS__ . '.SEOReport', 'SEO report');
+    }
 
-	public function group()
-	{
-		return _t(__CLASS__.'.SEOReportGroup', 'SEO reports');
-	}
+    public function group()
+    {
+        return _t(__CLASS__ . '.SEOReportGroup', 'SEO reports');
+    }
 
-	public function getParameterFields()
-	{
-		return new FieldList(
-			TextField::create('Title'),
-			TextField::create('MetaTitle'),
-			TextField::create('MetaDescription'),
-			CheckboxField::create('DuplicatedOnes', 'Show only duplicate titles'),
-			CheckboxField::create('EmptyMetaTitles', 'Show only empty meta titles'),
-			CheckboxField::create('EmptyMetaDescriptions', 'Show only empty meta descriptions'),
-			CheckboxField::create('OnLive', 'Check live site')
-		);
-	}
+    public function getParameterFields()
+    {
+        return new FieldList(
+            TextField::create('Title'),
+            TextField::create('MetaTitle'),
+            TextField::create('MetaDescription'),
+            CheckboxField::create('DuplicatedOnes', 'Show only duplicate titles'),
+            CheckboxField::create('EmptyMetaTitles', 'Show only empty meta titles'),
+            CheckboxField::create('EmptyMetaDescriptions', 'Show only empty meta descriptions'),
+            CheckboxField::create('OnLive', 'Check live site')
+        );
+    }
 
-	public function columns()
-	{
-		return [
-			'Title' 			=> [
-				'title' 		=> 'Title',
-				'link' 			=> true,
-			],
-			'MetaTitle' 		=> [
-				'title' 		=> 'Meta Title',
-				'link' 			=> true,
-			],
-			'MetaDescription' 	=> [
-				'title' 		=> 'Meta Description',
-				'link' 			=> true,
-			],
-			'SEOErrors'			=> [
-				'title'			=> 'Comments',
-				'link'			=> true
-			]
-			
-		];
-	}
+    public function columns()
+    {
+        return [
+            'Title'             => [
+                'title'         => 'Title',
+                'link'          => true,
+            ],
+            'MetaTitle'         => [
+                'title'         => 'Meta Title',
+                'link'          => true,
+            ],
+            'MetaDescription'   => [
+                'title'         => 'Meta Description',
+                'link'          => true,
+            ],
+            'SEOErrors'         => [
+                'title'         => 'Comments',
+                'link'          => true
+            ]
+            
+        ];
+    }
 
-	public function sourceRecords($params = null)
-	{
-		$stage = isset($params['OnLive']) ? Versioned::LIVE : Versioned::DRAFT;
-		$list = Versioned::get_by_stage(SiteTree::class, $stage);
+    public function sourceRecords($params = null)
+    {
+        $stage = isset($params['OnLive']) ? Versioned::LIVE : Versioned::DRAFT;
+        $list = Versioned::get_by_stage(SiteTree::class, $stage);
 
-		// check for meta title
-		// check for meta description
-		// duplicate title check
-		$list = $list->where('("SiteTree"."MetaTitle" IS NULL OR CHAR_LENGTH("SiteTree"."MetaTitle") < 10)
+        // check for meta title
+        // check for meta description
+        // duplicate title check
+        $list = $list->where('("SiteTree"."MetaTitle" IS NULL OR CHAR_LENGTH("SiteTree"."MetaTitle") < 10)
 			OR (
 				"SiteTree"."MetaDescription" IS NULL 
 				OR CHAR_LENGTH("SiteTree"."MetaDescription") < 20
@@ -88,7 +87,6 @@ class SEOReport extends Report
 			)');
 
 
-		return $list;
-	}
-
+        return $list;
+    }
 }
