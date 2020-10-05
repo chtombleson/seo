@@ -14,7 +14,6 @@ use SilverStripe\SiteConfig\SiteConfig;
 
 class Variable extends DataObject
 {
-
     private static $table_name = 'SEO_variable';
 
     private static $db = [
@@ -38,20 +37,25 @@ class Variable extends DataObject
                 'Year' => DBDatetime::now()->Format('yyyy'),
                 'SiteTitle' => SiteConfig::current_site_config()->Title
             ];
+
             foreach (self::get() as $var) {
                 $ret[$var->Name] = $var->Value;
             }
+
             self::$vars = $ret;
         }
+
         return self::$vars;
     }
 
     public static function process_varialbes($text, $options = [])
     {
         $vars = array_merge($options, self::get_sort_variables());
+
         foreach ($vars as $name => $val) {
             $text = str_replace('{' . $name . '}', $val, $text);
         }
+
         return $text;
     }
 }

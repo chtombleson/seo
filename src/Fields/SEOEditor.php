@@ -34,7 +34,6 @@ use SilverStripers\SEO\Model\Variable;
  */
 class SEOEditor extends FormField
 {
-
     private static $allowed_actions = [
         'duplicatecheck'
     ];
@@ -49,7 +48,9 @@ class SEOEditor extends FormField
     public function __construct($name, $title = null, $value = null, $record = null)
     {
         parent::__construct($name, $title, $value);
+
         $this->addExtraClass('stacked');
+
         if ($record) {
             $this->setRecord($record);
         }
@@ -58,6 +59,7 @@ class SEOEditor extends FormField
     public function setRecord($record)
     {
         $this->record = $record;
+
         return $this;
     }
 
@@ -69,18 +71,21 @@ class SEOEditor extends FormField
     public function setEnableSettings($enable = true)
     {
         $this->enableSettings = $enable;
+
         return $this;
     }
 
     public function setEnableSEOImages($enable = true)
     {
         $this->enableSEOImages = $enable;
+
         return $this;
     }
 
     public function setFallbackImage(Image $image)
     {
         $this->fallBackImage = $image;
+
         return $this;
     }
 
@@ -102,12 +107,14 @@ class SEOEditor extends FormField
     public function setSingularName($name)
     {
         $this->singular_name = $name;
+
         return $this;
     }
 
     public function setPluralName($name)
     {
         $this->plural_name = $name;
+
         return $this;
     }
 
@@ -116,6 +123,7 @@ class SEOEditor extends FormField
         if ($this->singular_name) {
             return $this->singular_name;
         }
+
         return $this->record->i18n_singular_name();
     }
 
@@ -124,12 +132,14 @@ class SEOEditor extends FormField
         if ($this->plural_name) {
             return $this->plural_name;
         }
+
         return $this->record->i18n_plural_name();
     }
 
     public function getSEOJSON()
     {
         $data = $this->record->SEOData();
+
         if ($this->value && is_array($this->value)) {
             foreach ($data as $key => $value) {
                 if (isset($this->value[$key])) {
@@ -137,12 +147,14 @@ class SEOEditor extends FormField
                 }
             }
         }
+
         return json_encode($data);
     }
 
     public function getSEOJSONAttr()
     {
         $data = $this->getSEOJSON();
+
         return Convert::raw2att($data);
     }
 
@@ -160,6 +172,7 @@ class SEOEditor extends FormField
     {
         Requirements::javascript('silverstripers/seo:client/dist/js/bundle.js');
         Requirements::add_i18n_javascript('silverstripers/seo:client/lang', false, true);
+
         return parent::Field($properties);
     }
 
@@ -168,6 +181,7 @@ class SEOEditor extends FormField
         if ($this->record && method_exists($this->record, 'AbsoluteLink')) {
             return $this->record->AbsoluteLink();
         }
+
         return Director::absoluteBaseURL();
     }
 
@@ -175,6 +189,7 @@ class SEOEditor extends FormField
     {
         $seoData = $this->record->SEOData();
         $fields = array_keys($seoData);
+
         return $fields;
     }
 
@@ -185,6 +200,7 @@ class SEOEditor extends FormField
                 return true;
             }
         }
+
         return false;
     }
 
@@ -202,6 +218,7 @@ class SEOEditor extends FormField
     public function setValue($value, $data = null)
     {
         $this->value = $value;
+
         return $this;
     }
 
@@ -217,16 +234,19 @@ class SEOEditor extends FormField
             'valid'     => 1,
             'duplicates'=> ''
         ];
+
         if ($this->record && $this->request->requestVar('Field') && $this->request->requestVar('Needle')) {
             $result['checked'] = 1;
             $list = DataList::create(get_class($this->record))
                 ->filter($this->request->requestVar('Field') . ':PartialMatch', $this->request->requestVar('Needle'))
                 ->exclude('ID', $this->record->ID);
+
             if ($list->count()) {
                 $result['valid'] = 0;
                 $result['duplicates'] = SEODataExtension::get_duplicates_list($list);
             }
         }
+
         return Convert::array2json($result);
     }
 }

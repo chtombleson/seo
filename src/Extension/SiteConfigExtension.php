@@ -25,17 +25,14 @@ use SilverStripers\SEO\Model\Variable;
 
 class SiteConfigExtension extends DataExtension
 {
-
     private static $db = [
         'DisableSearchEngineVisibility' => 'Boolean',
         'TwitterUsername' => 'Varchar(250)',
         'FacebookAdmin' => 'Varchar(250)',
         'FacebookAppID' => 'Varchar(250)',
-
         'HeadScripts' => 'Text',
         'BodyStartScripts' => 'Text',
         'BodyEndScripts' => 'Text',
-
         'RobotsTXT' => 'Text',
         'DefaultMetaTitle' => 'Varchar(255)'
     ];
@@ -55,14 +52,12 @@ class SiteConfigExtension extends DataExtension
             LiteralField::create('SearchNote', '<p>Note that it is up to the search engines not to index this site</p>')
         ]);
 
-
         $fields->addFieldsToTab('Root.SEO.Social', [
             TextField::create('TwitterUsername', 'Twitter Username'),
             TextField::create('FacebookAdmin', 'Facebook Admin Meta'),
             TextField::create('FacebookAppID', 'Facebook App ID'),
             UploadField::create('GlobalSocialSharingImage', 'Global Social Sharing Image')
         ]);
-
 
         $fields->addFieldsToTab('Root.SEO.Embeds', [
             TextareaField::create('HeadScripts', 'Scripts within <head> block'),

@@ -18,7 +18,6 @@ use SilverStripers\SEO\Extension\SEODataExtension;
 
 class SEORequestProcessor implements HTTPMiddleware
 {
-
     use Configurable;
 
     private static $exclude_rules = [
@@ -45,6 +44,7 @@ class SEORequestProcessor implements HTTPMiddleware
             if (!$matches) {
                 preg_match("/<body[\s\S]+?>/", $body, $matches);
             }
+
             if ($matches) {
                 $bodyTag = $matches[0];
                 $start = strpos($body, $bodyTag);
@@ -58,9 +58,11 @@ class SEORequestProcessor implements HTTPMiddleware
         if (strpos($body, '</body>') !== false) {
             /* @var $record SEODataExtension */
             $help = false;
+
             if (($request->requestVar('structureddata_help') == 1) && ($record = SEODataExtension::get_seo_record())) {
                 $help = $record->getStructuredDataHelpTips();
             }
+
             if ($config->BodyEndScripts || $help) {
                 $bodyEnd = strpos($body, '</body>');
                 $before = substr($body, 0, $bodyEnd);
@@ -80,12 +82,15 @@ class SEORequestProcessor implements HTTPMiddleware
          */
         $response = $delegate($request);
         $headers = $response->getHeaders();
+
         if ($response
             && ($body = $response->getbody())
-            && $this->canAddSEOScripts($request, $response)) {
+            && $this->canAddSEOScripts($request, $response)
+        ) {
             $body = $this->processInputs($body, $request);
             $response->setBody($body);
         }
+
         return $response;
     }
 
@@ -95,6 +100,7 @@ class SEORequestProcessor implements HTTPMiddleware
         $headers = $response->getHeaders();
 
         $rules = self::config()->get('exclude_rules');
+
         if (count($rules)) {
             foreach ($rules as $rule) {
                 if (substr($rule, -1) == '*') {

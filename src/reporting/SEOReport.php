@@ -19,7 +19,6 @@ use SilverStripe\Versioned\Versioned;
 
 class SEOReport extends Report
 {
-
     public function title()
     {
         return _t(__CLASS__ . '.SEOReport', 'SEO report');
@@ -62,7 +61,7 @@ class SEOReport extends Report
                 'title'         => 'Comments',
                 'link'          => true
             ]
-            
+
         ];
     }
 
@@ -75,16 +74,16 @@ class SEOReport extends Report
         // check for meta description
         // duplicate title check
         $list = $list->where('("SiteTree"."MetaTitle" IS NULL OR CHAR_LENGTH("SiteTree"."MetaTitle") < 10)
-			OR (
-				"SiteTree"."MetaDescription" IS NULL 
-				OR CHAR_LENGTH("SiteTree"."MetaDescription") < 20
-				OR CHAR_LENGTH("SiteTree"."MetaDescription") > 160
-			)
-			OR (
-				EXISTS (SELECT 1 FROM "SiteTree" ds WHERE
-					ds.ID != "SiteTree"."ID"
-					AND ds.MetaTitle = "SiteTree"."MetaTitle")
-			)');
+            OR (
+                "SiteTree"."MetaDescription" IS NULL
+                OR CHAR_LENGTH("SiteTree"."MetaDescription") < 20
+                OR CHAR_LENGTH("SiteTree"."MetaDescription") > 160
+            )
+            OR (
+                EXISTS (SELECT 1 FROM "SiteTree" ds WHERE
+                    ds.ID != "SiteTree"."ID"
+                AND ds.MetaTitle = "SiteTree"."MetaTitle")
+            )');
 
 
         return $list;

@@ -15,7 +15,6 @@ use SilverStripers\SEO\Extension\SEODataExtension;
 
 class MetaTitleTemplate extends DataObject
 {
-
     private static $table_name = 'SEO_MetaTitleTemplate';
 
     private static $db = [
@@ -41,6 +40,7 @@ class MetaTitleTemplate extends DataObject
             $vars = array_merge([
                 'MetaTitle'
             ], array_keys(Variable::get_sort_variables()));
+
             $valueField->setDescription('<p>Options to choose from:<br> {' . implode('}<br>{', $vars) . '}</p>');
         }
         return $fields;
@@ -49,6 +49,7 @@ class MetaTitleTemplate extends DataObject
     public static function get_default_title()
     {
         $config = SiteConfig::current_site_config();
+
         return $config->DefaultMetaTitle ? : '{MetaTitle} | {SiteTitle}';
     }
 
@@ -59,12 +60,15 @@ class MetaTitleTemplate extends DataObject
     {
         $titleTemplate = null;
         $template = $record->MetaTitleTemplate();
+
         if ($template && $template->exists()) {
             $titleTemplate = $template->Value;
         }
+
         if (!$titleTemplate) {
             $titleTemplate = self::get_default_title();
         }
+
         return Variable::process_varialbes($titleTemplate, [
             'MetaTitle' => $title
         ]);

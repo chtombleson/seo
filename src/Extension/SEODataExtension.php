@@ -47,7 +47,6 @@ use SilverStripers\SEO\Model\Variable;
  */
 class SEODataExtension extends DataExtension
 {
-
     use Configurable;
 
     private static $override_seo = null;
@@ -87,6 +86,7 @@ class SEODataExtension extends DataExtension
             self::config()->get('db'),
             self::config()->get('has_one')
         ));
+
         $fields->removeByName($scaffoldFields);
 
         if (!$fields->fieldByName('Root.Main.SEOFields_Container')) {
@@ -156,17 +156,22 @@ class SEODataExtension extends DataExtension
         $tags = [];
         $siteConfig = SiteConfig::current_site_config();
         $record = SEODataExtension::get_override() ? : $this->owner;
+
         self::set_seo_record($record);
 
         $metaTitle = $record->obj('MetaTitle')->forTemplate();
+
         if (!$metaTitle) {
             $metaTitle = $record->obj('Title')->forTemplate();
         }
+
         $this->owner->invokeWithExtensions('updateMetaTitle', $metaTitle);
+
         if ($metaTitle) {
             if (!$raw) {
                 $metaTitle = MetaTitleTemplate::parse_meta_title($this->owner, $metaTitle);
             }
+
             $tags['title'] = $raw ? $metaTitle : HTML::createTag('title', [], $metaTitle);
             $tags['meta_title'] = $raw ? $metaTitle : HTML::createTag('meta', [
                 'name' => 'title',
@@ -182,9 +187,14 @@ class SEODataExtension extends DataExtension
         }
 
         $metaDescription = $record->obj('MetaDescription')->getValue();
-        if (!$metaDescription && ($fallbackField = $record->config()->get('fallback_meta_description')) && $record->obj($fallbackField)) {
+
+        if (!$metaDescription
+            && ($fallbackField = $record->config()->get('fallback_meta_description'))
+            && $record->obj($fallbackField)
+        ) {
             $metaDescription = $record->dbObject($fallbackField)->forTemplate();
         }
+
         if ($metaDescription) {
             $tags['meta_description'] = $raw ? $metaDescription : HTML::createTag('meta', [
                 'name' => 'description',
@@ -194,6 +204,7 @@ class SEODataExtension extends DataExtension
 
         if (ClassInfo::exists('SilverStripe\CMS\Model\SiteTree')) {
             $generator = trim(Config::inst()->get(SiteTree::class, 'meta_generator'));
+
             if (!empty($generator)) {
                 $tags['generator'] = $raw ? $generator : HTML::createTag('meta', [
                     'name' => 'generator',
@@ -209,11 +220,13 @@ class SEODataExtension extends DataExtension
         ]);
 
         $robots = [];
+
         if (SiteConfig::current_site_config()->DisableSearchEngineVisibility) {
             $robots[] = 'noindex';
         } elseif ($record->MetaRobotsIndex) {
             $robots[] = $record->MetaRobotsIndex;
         }
+
         if ($record->MetaRobotsFollow) {
             $robots[] = $record->MetaRobotsFollow;
         }
@@ -233,6 +246,7 @@ class SEODataExtension extends DataExtension
                 'name' => 'x-page-id',
                 'content' => $record->obj('ID')->forTemplate(),
             ]);
+
             $tags['x-cms-edit-link'] = HTML::createTag('meta', [
                 'name' => 'x-cms-edit-link',
                 'content' => $record->obj('CMSEditLink')->forTemplate(),
@@ -257,11 +271,13 @@ class SEODataExtension extends DataExtension
         ]);
 
         $facebookTitle = $record->obj('FacebookTitle')->getValue();
+
         if (!$facebookTitle) {
             $facebookTitle = $metaTitle;
         } elseif (!$raw) {
             $facebookTitle = MetaTitleTemplate::parse_meta_title($this->owner, $facebookTitle);
         }
+
         if ($facebookTitle) {
             $tags['og:title'] = $raw ? $facebookTitle : HTML::createTag('meta', [
                 'property' => 'og:title',
@@ -270,9 +286,11 @@ class SEODataExtension extends DataExtension
         }
 
         $fbDescription = $record->obj('FacebookDescription')->getValue();
+
         if (!$fbDescription) {
             $fbDescription = $metaDescription;
         }
+
         if ($fbDescription) {
             $tags['og:description'] = $raw ? $fbDescription : HTML::createTag('meta', [
                 'property' => 'og:description',
@@ -287,16 +305,17 @@ class SEODataExtension extends DataExtension
             ]);
         }
 
-
         $tags['og:site_name'] = $raw ? SiteConfig::current_site_config()->Title : HTML::createTag('meta', [
             'property' => 'og:site_name',
             'content' => SiteConfig::current_site_config()->Title
         ]);
 
         $fbImage = $record->FacebookImage();
+
         if (!$fbImage->exists()) {
             $fbImage = $record->getDefaultImage();
         }
+
         if ($fbImage && $fbImage->exists()) {
             $tags['og:image'] = $raw ? $fbImage->AbsoluteLink() : HTML::createTag('meta', [
                 'property' => 'og:image',
@@ -309,19 +328,19 @@ class SEODataExtension extends DataExtension
             ]);
         }
 
-
         $tags['twitter:card'] = $raw ? 'summary_large_image' : HTML::createTag('meta', [
             'name' => 'twitter:card',
             'content' => 'summary_large_image'
         ]);
 
-
         $twTitle = $record->obj('TwitterTitle')->getValue();
+
         if (!$twTitle) {
             $twTitle = $metaTitle;
         } elseif (!$raw) {
             $twTitle = MetaTitleTemplate::parse_meta_title($this->owner, $twTitle);
         }
+
         if ($twTitle) {
             $tags['twitter:title'] = $raw ? $twTitle : HTML::createTag('meta', [
                 'name' => 'twitter:title',
@@ -329,11 +348,12 @@ class SEODataExtension extends DataExtension
             ]);
         }
 
-
         $twDescription = $record->obj('TwitterDescription')->getValue();
+
         if (!$twDescription) {
             $twDescription = $metaDescription;
         }
+
         if ($twDescription) {
             $tags['twitter:description'] = $raw ? $twDescription : HTML::createTag('meta', [
                 'name' => 'twitter:description',
@@ -342,9 +362,11 @@ class SEODataExtension extends DataExtension
         }
 
         $twImage = $record->TwitterImage();
+
         if (!$twImage->exists()) {
             $twImage = $record->getDefaultImage();
         }
+
         if ($twImage && $twImage->exists()) {
             $tags['twitter:image'] = $raw ? $twImage->AbsoluteLink() : HTML::createTag('meta', [
                 'name' => 'twitter:image',
@@ -369,25 +391,32 @@ class SEODataExtension extends DataExtension
     public function GenerateMetaTags()
     {
         $tags = $this->MetaTagCollection();
+
         if (is_array($tags)) {
             $tags = implode("\n", $tags);
         }
+
         $tags = Variable::process_varialbes($tags);
+
         if ($structuredData = $this->StructuredData()) {
             $tags .= "\n" . $structuredData . "\n";
         }
+
         return $tags;
     }
 
     public function getDefaultImage()
     {
         $relation = $this->owner->config()->get('default_seo_image');
+
         if ($relation) {
             $image = $this->owner->getComponent($relation);
+
             if ($image && $image->exists()) {
                 return $image;
             }
         }
+
         return null;
     }
 
@@ -399,6 +428,7 @@ class SEODataExtension extends DataExtension
             'warning'   => 0,
             'error'     => 0,
         ];
+
         foreach ($result->getMessages() as $message) {
             if (isset($scores[$message['messageType']])) {
                 $scores[$message['messageType']] += 1;
@@ -415,36 +445,38 @@ class SEODataExtension extends DataExtension
         }
     }
 
-
     public function getOGPostType()
     {
         if (method_exists($this->owner, 'getOGPostType')) {
             return $this->owner->getOGPostType();
         }
+
         return 'article';
     }
-
 
     public static function get_duplicates_list(DataList $list)
     {
         $items = [];
+
         foreach ($list as $duplicate) {
             $link = method_exists($duplicate, 'Link') ? $duplicate->Link() : null;
+
             if ($link) {
                 $items[] = '<a href="' . $link . '" target="_blank">' . $duplicate->getTitle() . '</a>';
             } else {
                 $items[] = $duplicate->getTitle();
             }
         }
+
         return implode(",\n ", $items);
     }
-
 
     //
     public function validateKeyword(ValidationResult $result)
     {
         $record = $this->owner;
         $keyword = $record->FocusKeyword;
+
         if (empty($keyword)) {
             $result->addFieldError(
                 'FocusKeyword',
@@ -458,6 +490,7 @@ class SEODataExtension extends DataExtension
             $duplicates = DataList::create(get_class($this->owner))
                 ->exclude('ID', $record->ID)
                 ->filter('FocusKeyword', $keyword);
+
             if ($duplicates->count()) {
                 $items = self::get_duplicates_list($duplicates);
                 $result->addFieldError(
@@ -471,6 +504,7 @@ class SEODataExtension extends DataExtension
                     ValidationResult::CAST_HTML
                 );
             }
+
             if ($result->isValid()) {
                 $result->addFieldMessage('FocusKeyword', _t(
                     __CLASS__ . '.FocusKeywordPassed',
@@ -505,13 +539,14 @@ class SEODataExtension extends DataExtension
                     ValidationResult::TYPE_ERROR
                 );
             }
+
             if (strlen($metaTitle) < 45) {
                 $result->addFieldError(
                     'MetaTitle',
                     _t(
                         __CLASS__ . '.MetaTitleTooShort',
                         'The SEO title is too short. Use the space to add keyword variations or create
-							compelling call-to-action copy.'
+                            compelling call-to-action copy.'
                     ),
                     ValidationResult::TYPE_WARNING
                 );
@@ -519,7 +554,7 @@ class SEODataExtension extends DataExtension
                 $result->addFieldError(
                     'MetaTitle',
                     _t(__CLASS__ . '.MetaTitleTooLong', 'The SEO title is over 70 characters and may be truncated on search
-							results pages'),
+                            results pages'),
                     ValidationResult::TYPE_WARNING
                 );
             } else {
@@ -533,6 +568,7 @@ class SEODataExtension extends DataExtension
             $duplicates = DataList::create(get_class($record))
                 ->exclude('ID', $record->ID)
                 ->filter('MetaTitle', $record->MetaTitle);
+
             if ($duplicates->count()) {
                 $items = self::get_duplicates_list($duplicates);
                 $result->addFieldError(
@@ -563,6 +599,7 @@ class SEODataExtension extends DataExtension
     {
         $record = $this->owner;
         $desc = $record->MetaDescription;
+
         if (empty($desc)) {
             $result->addFieldError(
                 'MetaDescription',
@@ -580,6 +617,7 @@ class SEODataExtension extends DataExtension
                     ValidationResult::TYPE_ERROR
                 );
             }
+
             if (strlen($desc) < 120) {
                 $result->addFieldError(
                     'MetaDescription',
@@ -605,9 +643,11 @@ class SEODataExtension extends DataExtension
                     ValidationResult::TYPE_GOOD
                 );
             }
+
             $duplicates = DataList::create(get_class($record))
                 ->exclude('ID', $record->ID)
                 ->filter('MetaDescription', $record->MetaDescription);
+
             if ($duplicates->count()) {
                 $items = self::get_duplicates_list($duplicates);
                 $result->addFieldError(
@@ -625,6 +665,7 @@ class SEODataExtension extends DataExtension
                 );
             }
         }
+
         return $result;
     }
 
@@ -638,23 +679,29 @@ class SEODataExtension extends DataExtension
         $this->validateKeyword($results);
         $this->validateMetaTitle($results);
         $this->validateMetaDescription($results);
+
         return $results;
     }
 
     public function getSEOComments($type = null)
     {
         $results = $this->validateSEO();
+
         if (!$results->isValid()) {
             $errors = [];
+
             foreach ($results->getMessages() as $comment) {
                 if (!$type || $type == $comment['messageType']) {
                     $errors[] = $comment['message'];
                 }
             }
+
             $htmlText = HTMLValue::create();
             $htmlText->setContent(implode(', ', $errors));
+
             return $htmlText;
         }
+
         return null;
     }
 
@@ -674,6 +721,7 @@ class SEODataExtension extends DataExtension
     public function getStructuredDataTypeObject()
     {
         $owner = $this->owner;
+
         if ($shemaType = $owner->config()->get('schema_type')) {
             $className = 'JsonLd\\ContextTypes\\' . $shemaType;
             return new $className([]);
@@ -690,23 +738,29 @@ class SEODataExtension extends DataExtension
         /* @var $owner ViewableData */
         $owner = $this->owner;
         $map = $owner->config()->get('schema');
+
         if (!$map) {
             $map = [];
         }
+
         $keys = array_keys($map);
         $properties = $this->getStructuredDataProperties();
         $values = [];
+
         foreach (array_keys($properties) as $property) {
             if ($property == 'url' && method_exists($owner, 'AbsoluteLink')) {
                 $values[$property] = $owner->AbsoluteLink();
             } elseif (in_array($property, $keys)) {
                 $val = $owner->getField($map[$property]);
+
                 if (is_a($val, Image::class)) {
                     $val = $val->AbsoluteLink();
                 }
+
                 $values[$property] = $val;
             }
         }
+
         return $values;
     }
 
@@ -716,10 +770,13 @@ class SEODataExtension extends DataExtension
     private function getStructuredDataContext()
     {
         $owner = $this->owner;
+
         if ($shemaType = $owner->config()->get('schema_type')) {
             $fields = $this->mergeStructuredDataPropertyValues();
+
             return Context::create($shemaType, $fields);
         }
+
         return null;
     }
 
@@ -736,6 +793,7 @@ class SEODataExtension extends DataExtension
 
             $class = get_class($owner);
             $settings = '';
+
             foreach ($types as $type => $val) {
                 $val = !empty($map[$type]) ? $map[$type] : '';
                 $settings .= "        {$type}: " . $val . "\n";
