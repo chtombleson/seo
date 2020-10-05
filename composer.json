@@ -27,5 +27,12 @@
         "psr-4": {
             "SilverStripers\\SEO\\": "src/"
         }
+    },
+    "require-dev": {
+        "squizlabs/php_codesniffer": "^3.5"
+    },
+    "scripts": {
+        "lint": "phpcs src/",
+        "lint-clean": "phpcbf src/"
     }
 }
